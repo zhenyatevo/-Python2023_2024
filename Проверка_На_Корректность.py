@@ -3,7 +3,47 @@
 # (3) Интерпритатор ОПЗ (10б.)
 
 
-#Это функция для реализации пункта 1
+# Шаг (2) делаем ОПЗ
+def get_precedence(op):
+    precedences = {'+': 1, '-': 1, '*': 2, '/': 2}
+    return precedences.get(op, 0)  # Возвращает 0, если оператора нет в словаре
+
+def is_operator(c):
+    return c in '+-*/'
+
+def infix_to_postfix(expression):
+    result = []# Результат в ОПЗ
+    stack = []    # Стек для хранения операторов
+
+    for char in expression:
+        if char.isdigit():
+            # Если символ является однозначным числом, добавляем его в результат
+            result.append(char)
+        elif is_operator(char):
+            # Если символ является оператором, выталкиваем из стека все операторы
+            # с большим или равным приоритетом в результат
+            while stack and get_precedence(char) <= get_precedence(stack[-1]):
+                result.append(stack.pop())
+            stack.append(char)
+        elif char == '(': # Если символ - открывающая скобка, помещаем его в стек
+            stack.append(char)
+        elif char == ')':
+            # Если символ - закрывающая скобка, выталкиваем все операторы из стека
+            # до встречи открывающей скобки, которую мы удаляем из стека
+            while stack and stack[-1] != '(':
+                result.append(stack.pop())
+            stack.pop()  # Удаляем открывающую скобку из стека
+
+    # После прохода по всему выражению, выталкиваем все оставшиеся операторы из стека в результат
+    while stack:
+        result.append(stack.pop())
+
+    return ' '.join(result)    # Преобразуем список в строку и возвращаем
+
+
+
+
+#Шаг один (1)
 def is_valid_expression(expression):
     if not expression:# Проверка на пустую строку
         return False
@@ -42,22 +82,17 @@ def is_valid_expression(expression):
 
     return True
 
-# Примеры тестирования
+
+
+#Тестированиеы
 str1 = "(1*(2/3-4))"
-str2 = "(3-5)-4"
-str3 = "(-3+2)"
-str4= "-(3+2)"
-str5= "33+2"
-
-print(is_valid_expression(str1))
-print(is_valid_expression(str2))
-print(is_valid_expression(str3))
-print(is_valid_expression(str4))
-print(is_valid_expression(str5))
-
-
-
-
+if(is_valid_expression(str1)):
+    print(True)
+    #вызов 2 части, где строится ОПЗ
+    print("Было:",str1)
+    print("Стало:",infix_to_postfix(str1))
+else:
+    print(False)
 
 
 
