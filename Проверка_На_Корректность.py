@@ -3,6 +3,45 @@
 # (3) Интерпритатор ОПЗ (10б.)
 
 
+
+#Шаг один (1)
+def is_valid_expression(expression):
+    if not expression:# Проверка на пустую строку
+        return False
+
+    balance = 0 # для проверки скобок
+    operators = set("+-*/") #Используемые операторы
+    digits = set("123456789") #Список цифр для поверки на наличие др. символов
+    last_char = None # для проверки на подряд идущ. операторы и числа
+
+    for char in expression: # Проверка на корректность расстановки скобок и правильность символов
+        if char == '(': #проверка усл. корректной скобочной посл-ти
+            balance += 1
+        elif char == ')':
+            balance -= 1
+            if balance < 0:
+                return False
+        elif (char not in operators) and (char not in digits) and (char != '(') and (char != ')'):
+            return False # Недопустимый символ
+        if (last_char in operators) and (char in operators): # Два оператора подряд
+            return False
+        if last_char and last_char in digits and char in digits: # Два числа подряд без оператора между ними
+            return False
+        if last_char == '(' and char == '-': # Отрицательное число в выражении в скобках
+            return False
+        last_char = char
+    if balance != 0: # Несбалансированные скобки
+        return False
+    if expression[-1] in operators: # Выражение заканчивается оператором
+        return False
+    #if expression[0] in operators - set('-'): # Выражение начинается с *,/.+
+    if expression[0] in operators: #выр нач-ся с оператора
+        return False
+    return True
+
+
+
+
 # Шаг (2) делаем ОПЗ
 def get_precedence(op):
     precedences = {'+': 1, '-': 1, '*': 2, '/': 2}
@@ -43,54 +82,49 @@ def infix_to_postfix(expression):
 
 
 
-#Шаг один (1)
-def is_valid_expression(expression):
-    if not expression:# Проверка на пустую строку
-        return False
+# Часть (3), Вычисление выражения
+def calculate_postfix(expression):
+    stack = []
 
-    balance = 0 # для проверки скобок
-    operators = set("+-*/") #Используемые операторы
-    digits = set("123456789") #Список цифр для поверки на наличие др. символов
-    last_char = None # для проверки на подряд идущ. операторы и числа
+    for token in expression.split():
+        if token.isdigit():  # Если элемент - число, добавляем его в стек
+            stack.append(int(token))
+        else:  # Если элемент - оператор, выполняем операцию
+            # Извлекаем два последних числа из стека
+            right = stack.pop()
+            left = stack.pop()
+            # Выполняем операцию в зависимости от оператора
+            if token == '+':
+                stack.append(left + right)
+            elif token == '-':
+                stack.append(left - right)
+            elif token == '*':
+                stack.append(left * right)
+            elif token == '/':
+                if right == 0:
+                    raise ZeroDivisionError("Division by zero.")
+                stack.append(left / right)
+            else:
+                raise ValueError(f"Unknown operator: {token}")
 
-    for char in expression: # Проверка на корректность расстановки скобок и правильность символов
-        if char == '(': #проверка усл. корректной скобочной посл-ти
-            balance += 1
-        elif char == ')':
-            balance -= 1
-            if balance < 0:
-                return False
-        elif (char not in operators) and (char not in digits) and (char != '(') and (char != ')'):
-            return False # Недопустимый символ
-        if (last_char in operators) and (char in operators): # Два оператора подряд
-            return False
-        if last_char and last_char in digits and char in digits: # Два числа подряд без оператора между ними
-            return False
-        if last_char == '(' and char == '-': # Отрицательное число в выражении в скобках
-            return False
-        last_char = char
-
-    if balance != 0: # Несбалансированные скобки
-        return False
-
-    if expression[-1] in operators: # Выражение заканчивается оператором
-        return False
-
-    #if expression[0] in operators - set('-'): # Выражение начинается с *,/.+
-    if expression[0] in operators: #выр нач-ся с оператора
-        return False
-
-    return True
+    if len(stack) != 1: # Результат - 1 число в стеке
+        raise ValueError("Invalid expression.")
+    return stack[0]
 
 
 
-#Тестированиеы
-str1 = "(1*(2/3-4))"
+
+#Тестирование
+str1 = "(8*(6-4))"
 if(is_valid_expression(str1)):
     print(True)
     #вызов 2 части, где строится ОПЗ
     print("Было:",str1)
     print("Стало:",infix_to_postfix(str1))
+    # вызов 3 части, вычисление
+    expression_opz = infix_to_postfix(str1)
+    print(calculate_postfix(expression_opz))
+
 else:
     print(False)
 
