@@ -140,7 +140,7 @@ if(is_valid_expression(str1)):
     print(calculate_postfix(expression_opz))
 
 else:
-    print(False)
+    print("Error")
 
 
 
